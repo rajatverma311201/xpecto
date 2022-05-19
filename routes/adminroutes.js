@@ -212,7 +212,7 @@ router.post("/eventteamdetails", adminCheck, async (req, res) => {
 		let leaderID = teams[i].teamLeader;
 		for (let j = 0; j < members.length; j++) {
 			const userID = members[j].member_id;
-			let user = await userDetails.findOne({ _id: userID });
+			let user = await userDetails.findOne({ _id: userID }).lean();
 			if (user) {
 				const userData = {
 					Name: user.displayName,
@@ -222,7 +222,7 @@ router.post("/eventteamdetails", adminCheck, async (req, res) => {
 				allMembers.push(JSON.stringify(userData));
 			}
 		}
-		let leader = await userDetails.findOne({ _id: leaderID });
+		let leader = await userDetails.findOne({ _id: leaderID }).lean();
 		let leaderData;
 		if (leader) {
 			leaderData = {
@@ -275,13 +275,16 @@ router.post("/eventregistrations", adminCheck, async (req, res) => {
 	let records = [];
 	for (let i = 0; i < regUsers.length; i++) {
 		const userID = regUsers[i].user_id;
-		let user = await userDetails.findOne({ _id: userID });
+		let user = await userDetails.findOne({ _id: userID }).lean();
 		if (user) {
 			const userData = {
 				Name: user.displayName,
 				Email: user.email,
 				Phone: user.phoneNumber,
 				RefCode: user.referralCode,
+				College: user.collegeName,
+				Branch: user.branch,
+				Degree: user.degree,
 			};
 			records.push(userData);
 		}
@@ -293,7 +296,15 @@ router.post("/eventregistrations", adminCheck, async (req, res) => {
 			`<h1>No registrations yet for event: ${eventDetails.name} </h1>`
 		);
 	} else {
-		const csvFields = ["Name", "Email", "Phone", "RefCodeUsed"];
+		const csvFields = [
+			"Name",
+			"Email",
+			"Phone",
+			"RefCodeUsed",
+			"College",
+			"Branch",
+			"Degree",
+		];
 		const csvParser = new CsvParser({ csvFields });
 		const csvData = csvParser.parse(records);
 		res.setHeader("Content-Type", "text/csv");
@@ -322,10 +333,10 @@ router.get("/eventcoordilogin", (req, res) => {
 });
 
 router.post("/eventcoordiauth", (req, res) => {
-	console.log(
-		"process.env.EVENTCOORDIEMAIL = ",
-		process.env.EVENTCOORDIEMAIL
-	);
+	// console.log(
+	// 	"process.env.EVENTCOORDIEMAIL = ",
+	// 	process.env.EVENTCOORDIEMAIL
+	// );
 	if (
 		req.body.email == process.env.EVENTCOORDIEMAIL &&
 		req.body.password == process.env.EVENTCOORDIPASS
@@ -371,7 +382,7 @@ router.post("/eventwiseteam", eventCoordiCheck, async (req, res) => {
 		let leaderID = teams[i].teamLeader;
 		for (let j = 0; j < members.length; j++) {
 			const userID = members[j].member_id;
-			let user = await userDetails.findOne({ _id: userID });
+			let user = await userDetails.findOne({ _id: userID }).lean();
 			if (user) {
 				const userData = {
 					Name: user.displayName,
@@ -381,7 +392,7 @@ router.post("/eventwiseteam", eventCoordiCheck, async (req, res) => {
 				allMembers.push(JSON.stringify(userData));
 			}
 		}
-		let leader = await userDetails.findOne({ _id: leaderID });
+		let leader = await userDetails.findOne({ _id: leaderID }).lean();
 		let leaderData;
 		if (leader) {
 			leaderData = {
@@ -435,13 +446,16 @@ router.post("/eventwiseregs", eventCoordiCheck, async (req, res) => {
 	let records = [];
 	for (let i = 0; i < regUsers.length; i++) {
 		const userID = regUsers[i].user_id;
-		let user = await userDetails.findOne({ _id: userID });
+		let user = await userDetails.findOne({ _id: userID }).lean();
 		if (user) {
 			const userData = {
 				Name: user.displayName,
 				Email: user.email,
 				Phone: user.phoneNumber,
 				RefCode: user.referralCode,
+				College: user.collegeName,
+				Branch: user.branch,
+				Degree: user.degree,
 			};
 			records.push(userData);
 		}
@@ -453,7 +467,15 @@ router.post("/eventwiseregs", eventCoordiCheck, async (req, res) => {
 			`<h1>No registrations yet for event: ${eventDetails.name} </h1>`
 		);
 	} else {
-		const csvFields = ["Name", "Email", "Phone", "RefCodeUsed"];
+		const csvFields = [
+			"Name",
+			"Email",
+			"Phone",
+			"RefCodeUsed",
+			"College",
+			"Branch",
+			"Degree",
+		];
 		const csvParser = new CsvParser({ csvFields });
 		const csvData = csvParser.parse(records);
 		res.setHeader("Content-Type", "text/csv");
